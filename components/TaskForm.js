@@ -1,19 +1,22 @@
 
 
 
+
+
 // import { useState } from 'react';
 // import axios from 'axios';
 
 // export default function TaskForm({ users, onTaskCreated, task }) {
+//   console.log('TaskForm rendered', { users, task }); // Debug log
 //   const isEdit = !!task;
 //   const [formData, setFormData] = useState(
 //     isEdit
 //       ? {
-//           title: task.title,
+//           title: task.title || '',
 //           description: task.description || '',
 //           dueDate: task.dueDate ? task.dueDate.split('T')[0] : '',
-//           priority: task.priority,
-//           status: task.status,
+//           priority: task.priority || 'Medium',
+//           status: task.status || 'Pending',
 //           assignedTo: task.assignedTo?._id || '',
 //         }
 //       : {
@@ -29,14 +32,17 @@
 
 //   const handleSubmit = async (e) => {
 //     e.preventDefault();
+//     console.log('Form submitted', formData); // Debug log
 //     setError('');
 
 //     if (!formData.title.trim()) {
 //       setError('Title is required');
+//       console.log('Validation error: Title is required'); // Debug log
 //       return;
 //     }
 //     if (formData.dueDate && new Date(formData.dueDate) < new Date()) {
 //       setError('Due date cannot be in the past');
+//       console.log('Validation error: Due date cannot be in the past'); // Debug log
 //       return;
 //     }
 
@@ -44,6 +50,7 @@
 //       const token = localStorage.getItem('token');
 //       if (!token) {
 //         setError('No authentication token found. Please log in.');
+//         console.log('Error: No token found'); // Debug log
 //         return;
 //       }
 
@@ -57,21 +64,26 @@
 //       if (formData.dueDate) {
 //         payload.dueDate = formData.dueDate;
 //       }
-//       console.log('Sending task data:', payload);
+//       console.log('Sending task data:', payload); // Debug log
+
+//       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+//       console.log('API URL:', apiUrl); // Debug log
 
 //       if (isEdit) {
 //         const res = await axios.put(
-//           `${process.env.NEXT_PUBLIC_API_URL}/api/tasks/${task._id}`,
+//           `${apiUrl}/api/tasks/${task._id}`,
 //           payload,
 //           { headers: { Authorization: `Bearer ${token}` } }
 //         );
+//         console.log('Task updated:', res.data); // Debug log
 //         onTaskCreated(res.data);
 //       } else {
 //         const res = await axios.post(
-//           `${process.env.NEXT_PUBLIC_API_URL}/api/tasks`,
+//           `${apiUrl}/api/tasks`,
 //           payload,
 //           { headers: { Authorization: `Bearer ${token}` } }
 //         );
+//         console.log('Task created:', res.data); // Debug log
 //         onTaskCreated(res.data);
 //       }
 
@@ -165,15 +177,20 @@
 //           className="w-full p-2 border rounded"
 //         >
 //           <option value="">No Assigned To</option>
-//           {users.map((user) => (
-//             <option key={user._id} value={user._id}>{user.username}</option>
-//           ))}
+//           {Array.isArray(users) && users.length > 0 ? (
+//             users.map((user) => (
+//               <option key={user._id} value={user._id}>{user.username}</option>
+//             ))
+//           ) : (
+//             <option disabled>No users available</option>
+//           )}
 //         </select>
 //       </div>
 
 //       <button
 //         type="submit"
 //         className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded transition-colors"
+//         onClick={() => console.log('Create Task button clicked')} // Debug log
 //       >
 //         {isEdit ? 'Update Task' : 'Create Task'}
 //       </button>
@@ -185,11 +202,16 @@
 
 
 
-import { useState } from 'react';
+
+
+
+
+
+import { useState, memo } from 'react';
 import axios from 'axios';
 
-export default function TaskForm({ users, onTaskCreated, task }) {
-  console.log('TaskForm rendered', { users, task }); // Debug log
+function TaskForm({ users, onTaskCreated, task }) {
+  console.log('TaskForm rendered', { users, task });
   const isEdit = !!task;
   const [formData, setFormData] = useState(
     isEdit
@@ -199,7 +221,7 @@ export default function TaskForm({ users, onTaskCreated, task }) {
           dueDate: task.dueDate ? task.dueDate.split('T')[0] : '',
           priority: task.priority || 'Medium',
           status: task.status || 'Pending',
-          assignedTo: task.assignedTo?._id || '',
+          assignedTo: task.assignedTo?._id || task.assignedTo || '',
         }
       : {
           title: '',
@@ -214,17 +236,17 @@ export default function TaskForm({ users, onTaskCreated, task }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Form submitted', formData); // Debug log
+    console.log('Form submitted', formData);
     setError('');
 
     if (!formData.title.trim()) {
       setError('Title is required');
-      console.log('Validation error: Title is required'); // Debug log
+      console.log('Validation error: Title is required');
       return;
     }
     if (formData.dueDate && new Date(formData.dueDate) < new Date()) {
       setError('Due date cannot be in the past');
-      console.log('Validation error: Due date cannot be in the past'); // Debug log
+      console.log('Validation error: Due date cannot be in the past');
       return;
     }
 
@@ -232,7 +254,7 @@ export default function TaskForm({ users, onTaskCreated, task }) {
       const token = localStorage.getItem('token');
       if (!token) {
         setError('No authentication token found. Please log in.');
-        console.log('Error: No token found'); // Debug log
+        console.log('Error: No token found');
         return;
       }
 
@@ -246,10 +268,10 @@ export default function TaskForm({ users, onTaskCreated, task }) {
       if (formData.dueDate) {
         payload.dueDate = formData.dueDate;
       }
-      console.log('Sending task data:', payload); // Debug log
+      console.log('Sending task data:', payload);
 
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      console.log('API URL:', apiUrl); // Debug log
+      console.log('API URL:', apiUrl);
 
       if (isEdit) {
         const res = await axios.put(
@@ -257,7 +279,7 @@ export default function TaskForm({ users, onTaskCreated, task }) {
           payload,
           { headers: { Authorization: `Bearer ${token}` } }
         );
-        console.log('Task updated:', res.data); // Debug log
+        console.log('Task updated:', res.data);
         onTaskCreated(res.data);
       } else {
         const res = await axios.post(
@@ -265,7 +287,7 @@ export default function TaskForm({ users, onTaskCreated, task }) {
           payload,
           { headers: { Authorization: `Bearer ${token}` } }
         );
-        console.log('Task created:', res.data); // Debug log
+        console.log('Task created:', res.data);
         onTaskCreated(res.data);
       }
 
@@ -355,13 +377,18 @@ export default function TaskForm({ users, onTaskCreated, task }) {
         <label className="block text-sm font-medium">Assigned To (Responsible for Completion)</label>
         <select
           value={formData.assignedTo}
-          onChange={(e) => setFormData({ ...formData, assignedTo: e.target.value })}
+          onChange={(e) => {
+            console.log('Selected assignedTo:', e.target.value); // Debug log
+            setFormData({ ...formData, assignedTo: e.target.value });
+          }}
           className="w-full p-2 border rounded"
         >
           <option value="">No Assigned To</option>
           {Array.isArray(users) && users.length > 0 ? (
             users.map((user) => (
-              <option key={user._id} value={user._id}>{user.username}</option>
+              <option key={user._id} value={user._id}>
+                {user.username}
+              </option>
             ))
           ) : (
             <option disabled>No users available</option>
@@ -372,10 +399,12 @@ export default function TaskForm({ users, onTaskCreated, task }) {
       <button
         type="submit"
         className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded transition-colors"
-        onClick={() => console.log('Create Task button clicked')} // Debug log
+        onClick={() => console.log('Create Task button clicked')}
       >
         {isEdit ? 'Update Task' : 'Create Task'}
       </button>
     </form>
   );
 }
+
+export default memo(TaskForm);
